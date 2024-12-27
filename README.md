@@ -2,6 +2,10 @@
 
 TypoChecker is a tool for scanning source code files for common typographical errors. The tool checks through text-based files in a given repository to identify and suggest corrections for any matches found.
 
+<p align="center" width="100%">
+    <img src="typo_checker.png" alt="TypoChecker Image">
+</p>
+
 ## Features
 
 - **Automatic typo detection**: Scan through files in a repository for known typos.
