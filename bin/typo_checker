@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require_relative '../lib/typo_checker/cli'
+
+TypoChecker::CLI.start(ARGV)
