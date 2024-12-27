@@ -6,20 +6,36 @@ require 'fileutils'
 
 module TypoChecker
   class Checker
-    attr_reader :typos
+    attr_reader :typos, :excludes
 
-    def initialize
+    def initialize(excludes = [])
       csv_file = File.expand_path('data/typos.csv', __dir__)
       @typos = load_typos(csv_file)
+      @excludes = excludes
     end
 
     def scan_repo(repo_path = Dir.pwd)
       Find.find(repo_path) do |path|
+        next if exclude_path?(path)
+
         scan_file(path) if File.file?(path) && text_file?(path)
       end
     end
 
     private
+
+    def exclude_path?(path)
+      exclude_patterns.any? { |pattern| path.match?(pattern) }
+    end
+
+    def exclude_patterns
+      @exclude_patterns ||= excludes + [
+        %r{\.git/.*},        # Skip all files and directories inside .git
+        %r{node_modules/.*}, # Skip all files and directories inside node_modules
+        %r{vendor/.*},       # Skip all files and directories inside vendor
+        %r{tmp/.*}           # Skip all files and directories inside tmp
+      ]
+    end
 
     def load_typos(csv_file)
       typos = {}
@@ -30,6 +46,10 @@ module TypoChecker
     end
 
     def text_file?(path)
+      excluded_extensions = ['.log', '.json']
+
+      return false if excluded_extensions.include?(File.extname(path))
+
       %w[
         .rb .txt .md .html .css .js .py .java .php .go .swift .ts .scala .c .cpp .csharp .h .lua .pl .rs .kt
         .d .r .m .sh .bash .bat .json .yaml .xml .scss .tsv .vb .ps1 .clj .elixir .f# .vhdl .verilog
