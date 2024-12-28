@@ -46,7 +46,7 @@ module TypoChecker
     end
 
     def text_file?(path)
-      excluded_extensions = ['.log', '.json']
+      excluded_extensions = %w[.log]
 
       return false if excluded_extensions.include?(File.extname(path))
 

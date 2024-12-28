@@ -101,4 +101,12 @@ RSpec.describe TypoChecker::Checker do
       end
     end
   end
+
+  describe 'text_file?' do
+    let(:repo_path) { '/path/to/repo' }
+
+    it 'excludes log files' do
+      expect(checker.send(:text_file?, "#{repo_path}/file.log")).to be false
+    end
+  end
 end
