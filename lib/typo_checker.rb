@@ -6,12 +6,14 @@ require 'fileutils'
 
 module TypoChecker
   class Checker
-    attr_reader :typos, :excludes, :skips
+    attr_reader :typos, :excludes, :skips, :found_typos, :stdoutput
 
-    def initialize(excludes = [], skips = [])
+    def initialize(excludes = [], skips = [], stdoutput = true)
       @excludes = excludes
       @skips = skips.map(&:downcase)
       @typos = load_typos
+      @found_typos = []
+      @stdoutput = stdoutput
     end
 
     def scan_repo(repo_path = Dir.pwd)
@@ -20,6 +22,8 @@ module TypoChecker
 
         scan_file(path) if File.file?(path) && text_file?(path)
       end
+
+      @found_typos
     end
 
     private
@@ -76,8 +80,18 @@ module TypoChecker
 
       corrected_word = corrected_word(word, typos[word.downcase])
       typo_path = "#{file}:#{line_num + 1}:#{char_index + 1}"
-      puts "Typo found in #{colorize_light_blue(typo_path)}: " \
-            "#{colorize_red(word)} -> #{colorize_green(corrected_word)}"
+      typo_details = {
+        path: file,
+        line: line_num + 1,
+        typos: {
+          incorrect_word: word,
+          correct_word: corrected_word
+        }
+      }
+
+      @found_typos << typo_details
+
+      stdout(typo_path, word, corrected_word) if stdoutput
     end
 
     def split_function_name(name)
@@ -92,6 +106,11 @@ module TypoChecker
       else
         typo_correct_word
       end
+    end
+
+    def stdout(typo_path, word, corrected_word)
+      puts "Typo found in #{colorize_light_blue(typo_path)}: " \
+            "#{colorize_red(word)} -> #{colorize_green(corrected_word)}"
     end
 
     def colorize_red(text)

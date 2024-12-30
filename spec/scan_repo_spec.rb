@@ -54,6 +54,7 @@ RSpec.describe TypoChecker::Checker do
       output = capture_stdout { checker.scan_repo(repo_path) }
       output = clean_output(output)
       expect(output).to match(%r{Typo found in #{repo_path}/example.py:1:5: mumber -> number})
+      expect(output).to match(%r{Typo found in #{repo_path}/example.py:4:1: mumber -> number})
     end
 
     it 'detects typos in JavaScript files' do
@@ -75,6 +76,63 @@ RSpec.describe TypoChecker::Checker do
       output = clean_output(output)
       expect(output).to match(%r{Typo found in #{repo_path}/example.php:2:10: mumber -> number})
       expect(output).to match(%r{Typo found in #{repo_path}/example.php:6:1: mumber -> number})
+    end
+
+    it '#found_typos' do
+      found_typos = checker.scan_repo(repo_path)
+      found_typos_expected = [
+        {
+          path: "#{repo_path}/Example.java",
+          line: 2,
+          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+        },
+        {
+          path: "#{repo_path}/Example.java",
+          line: 7,
+          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+        },
+        {
+          path: "#{repo_path}/example.js",
+          line: 1,
+          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+        },
+        {
+          path: "#{repo_path}/example.js",
+          line: 4,
+          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+        },
+        {
+          path: "#{repo_path}/example.php",
+          line: 2,
+          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+        },
+        {
+          path: "#{repo_path}/example.php",
+          line: 6,
+          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+        },
+        {
+          path: "#{repo_path}/example.py",
+          line: 1,
+          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+        },
+        {
+          path: "#{repo_path}/example.py",
+          line: 4,
+          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+        },
+        {
+          path: "#{repo_path}/example.rb",
+          line: 1,
+          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+        },
+        {
+          path: "#{repo_path}/example.rb",
+          line: 4,
+          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+        }
+      ]
+      expect(found_typos).to eq found_typos_expected
     end
 
     private
