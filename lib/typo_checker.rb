@@ -6,30 +6,52 @@ require 'fileutils'
 
 module TypoChecker
   class Checker
-    attr_reader :typos
+    attr_reader :typos, :excludes, :skips
 
-    def initialize
-      csv_file = File.expand_path('data/typos.csv', __dir__)
-      @typos = load_typos(csv_file)
+    def initialize(excludes = [], skips = [])
+      @excludes = excludes
+      @skips = skips.map(&:downcase)
+      @typos = load_typos
     end
 
     def scan_repo(repo_path = Dir.pwd)
       Find.find(repo_path) do |path|
+        next if exclude_path?(path)
+
         scan_file(path) if File.file?(path) && text_file?(path)
       end
     end
 
     private
 
-    def load_typos(csv_file)
+    def exclude_path?(path)
+      exclude_patterns.any? { |pattern| path.match?(pattern) }
+    end
+
+    def exclude_patterns
+      @exclude_patterns ||= excludes + [
+        %r{\.git/.*},        # Skip all files and directories inside .git
+        %r{node_modules/.*}, # Skip all files and directories inside node_modules
+        %r{vendor/.*},       # Skip all files and directories inside vendor
+        %r{tmp/.*}           # Skip all files and directories inside tmp
+      ]
+    end
+
+    def load_typos
       typos = {}
+      csv_file = File.expand_path('data/typos.csv', __dir__)
       CSV.foreach(csv_file, headers: false) do |row|
+        next if skips.include?(row[0])
         typos[row[0]] = row[1]
       end
       typos
     end
 
     def text_file?(path)
+      excluded_extensions = %w[.log]
+
+      return false if excluded_extensions.include?(File.extname(path))
+
       %w[
         .rb .txt .md .html .css .js .py .java .php .go .swift .ts .scala .c .cpp .csharp .h .lua .pl .rs .kt
         .d .r .m .sh .bash .bat .json .yaml .xml .scss .tsv .vb .ps1 .clj .elixir .f# .vhdl .verilog

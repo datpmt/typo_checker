@@ -11,6 +11,7 @@ TypoChecker is a tool for scanning source code files for common typographical er
 - **Automatic typo detection**: Scan through files in a repository for known typos.
 - **Support for multiple file types**: It checks various source code and text file extensions.
 - **Colorized output**: Provides color-coded feedback for easier identification of typos.
+- **Customization**: Allows you to exclude certain files or skip specific typos.
 
 ## Installation
 
@@ -29,6 +30,8 @@ Once installed, you can use TypoChecker in your Ruby project to scan a directory
 ```bash
 # typo_checker scan /path/repo
 typo_checker scan . # current repo
+typo_checker scan . --excludes node_modules .git # or typo_checker scan . -e node_modules .git
+typo_checker scan . --excludes node_modules .git --skips rspec defs # or typo_checker scan . -e node_modules .git -s rspec defs
 ```
 
 ### Output
@@ -41,7 +44,7 @@ When a typo is found, the tool prints out the following information in a coloriz
 Example output:
 
 ```bash
-Typo found in /path/to/file.rb:10:15: myFuncton() -> myFunction()
+Typo found in /path/to/file.rb:10:15: myFuncton -> myFunction
 ```
 
 ## File Types Supported
