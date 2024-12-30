@@ -6,12 +6,12 @@ require 'fileutils'
 
 module TypoChecker
   class Checker
-    attr_reader :typos, :excludes
+    attr_reader :typos, :excludes, :skips
 
-    def initialize(excludes = [])
-      csv_file = File.expand_path('data/typos.csv', __dir__)
-      @typos = load_typos(csv_file)
+    def initialize(excludes = [], skips = [])
       @excludes = excludes
+      @skips = skips.map(&:downcase)
+      @typos = load_typos
     end
 
     def scan_repo(repo_path = Dir.pwd)
@@ -37,9 +37,11 @@ module TypoChecker
       ]
     end
 
-    def load_typos(csv_file)
+    def load_typos
       typos = {}
+      csv_file = File.expand_path('data/typos.csv', __dir__)
       CSV.foreach(csv_file, headers: false) do |row|
+        next if skips.include?(row[0])
         typos[row[0]] = row[1]
       end
       typos

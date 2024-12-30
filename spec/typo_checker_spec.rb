@@ -24,6 +24,26 @@ RSpec.describe TypoChecker::Checker do
       expect(checker.typos['mispell']).to eq('misspell')
       expect(checker.typos['realiable']).to eq('reliable')
     end
+
+    context 'with skips' do
+      context 'downcase' do
+        let(:checker) { described_class.new([], ['realiable']) }
+
+        it 'does not include skipped typos in the typos hash' do
+          expect(checker.typos['mispell']).to eq('misspell')
+          expect(checker.typos).not_to have_key('realiable')
+        end
+      end
+
+      context 'upcase' do
+        let(:checker) { described_class.new([], ['Realiable']) }
+
+        it 'does not include skipped typos in the typos hash' do
+          expect(checker.typos['mispell']).to eq('misspell')
+          expect(checker.typos).not_to have_key('realiable')
+        end
+      end
+    end
   end
 
   describe '#text_file?' do
@@ -107,6 +127,30 @@ RSpec.describe TypoChecker::Checker do
 
     it 'excludes log files' do
       expect(checker.send(:text_file?, "#{repo_path}/file.log")).to be false
+    end
+  end
+
+  describe '#load_typos' do
+    context 'when no skips are provided' do
+      it 'loads typos from a CSV file' do
+        checker = TypoChecker::Checker.new
+
+        typos = checker.send(:load_typos)
+
+        expect(typos['mispell']).to eq('misspell')
+        expect(typos['realiable']).to eq('reliable')
+      end
+    end
+
+    context 'when skips are provided' do
+      it 'skips the typos in the skips list' do
+        checker = TypoChecker::Checker.new([], ['mispell'])
+
+        typos = checker.send(:load_typos)
+
+        expect(typos['mispell']).to eq(nil)
+        expect(typos['realiable']).to eq('reliable')
+      end
     end
   end
 end
