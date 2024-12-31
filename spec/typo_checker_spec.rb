@@ -3,7 +3,6 @@
 require 'spec_helper'
 require 'csv'
 require 'fileutils'
-require 'pry'
 require_relative '../lib/typo_checker'
 
 RSpec.describe TypoChecker::Checker do
