@@ -6,24 +6,28 @@ require 'fileutils'
 
 module TypoChecker
   class Checker
-    attr_reader :typos, :excludes, :skips, :found_typos, :stdoutput
+    attr_reader :typos, :excludes, :skips, :stdoutput
 
     def initialize(excludes = [], skips = [], stdoutput = true)
       @excludes = excludes
       @skips = skips.map(&:downcase)
       @typos = load_typos
-      @found_typos = []
       @stdoutput = stdoutput
     end
 
     def scan_repo(repo_path = Dir.pwd)
+      result = {}
       Find.find(repo_path) do |path|
         next if exclude_path?(path)
 
-        scan_file(path) if File.file?(path) && text_file?(path)
+        scan_file(path, result) if File.file?(path) && text_file?(path)
       end
 
-      @found_typos
+      result.map do |path, data|
+        data[:typos].map do |entry|
+          { path: path, line: entry[:line], typos: entry[:typos] }
+        end
+      end.flatten
     end
 
     private
@@ -65,33 +69,35 @@ module TypoChecker
       ].include? File.extname(path)
     end
 
-    def scan_file(path)
+    def scan_file(path, result)
       File.foreach(path).with_index do |line, line_number|
         words = line.split(/[^a-zA-Z0-9']+/)
         check_words = words.map { |word| split_function_name(word) }.flatten
         check_words.each do |word|
           clean_word = word.gsub(/^[^\w]+|[^\w]+$/, '')
           char_index = line.index(clean_word)
-          check_word(clean_word, path, line_number, char_index)
+          check_word(clean_word, path, line_number, char_index, result)
         end
       end
     end
 
-    def check_word(word, file, line_num, char_index)
+    def check_word(word, file, line_num, char_index, result)
       return unless typos.key?(word.downcase)
 
       corrected_word = corrected_word(word, typos[word.downcase])
+      typo_details = { incorrect_word: word, correct_word: corrected_word }
       typo_path = "#{file}:#{line_num + 1}:#{char_index + 1}"
-      typo_details = {
-        path: file,
-        line: line_num + 1,
-        typos: {
-          incorrect_word: word,
-          correct_word: corrected_word
-        }
-      }
+      path = file.sub(%r{^./}, '')
 
-      @found_typos << typo_details
+      result[path] ||= {}
+      result[path][:typos] ||= []
+      line_entry = result[path][:typos].find { |entry| entry[:line] == line_num + 1 }
+
+      if line_entry
+        line_entry[:typos] << typo_details
+      else
+        result[path][:typos] << { line: line_num + 1, typos: [typo_details] }
+      end
 
       stdout(typo_path, word, corrected_word) if stdoutput
     end
