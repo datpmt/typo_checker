@@ -47,7 +47,9 @@ RSpec.describe TypoChecker::Checker do
       output = capture_stdout { checker.scan_repo(repo_path) }
       output = clean_output(output)
       expect(output).to match(%r{Typo found in #{repo_path}/example.rb:1:5: mumber -> number})
-      expect(output).to match(%r{Typo found in #{repo_path}/example.rb:5:1: mumber -> number})
+      expect(output).to match(%r{Typo found in #{repo_path}/example.rb:4:9: knowlege -> knowledge})
+      expect(output).to match(%r{Typo found in #{repo_path}/example.rb:4:19: languege -> language})
+      expect(output).to match(%r{Typo found in #{repo_path}/example.rb:6:1: mumber -> number})
     end
 
     it 'detects typos in Python files' do
@@ -84,57 +86,65 @@ RSpec.describe TypoChecker::Checker do
         {
           path: "#{repo_path}/Example.java",
           line: 2,
-          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+          typos: [{ incorrect_word: 'mumber', correct_word: 'number' }]
         },
         {
           path: "#{repo_path}/Example.java",
           line: 7,
-          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+          typos: [{ incorrect_word: 'mumber', correct_word: 'number' }]
         },
         {
           path: "#{repo_path}/example.js",
           line: 1,
-          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+          typos: [{ incorrect_word: 'mumber', correct_word: 'number' }]
         },
         {
           path: "#{repo_path}/example.js",
           line: 4,
-          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+          typos: [{ incorrect_word: 'mumber', correct_word: 'number' }]
         },
         {
           path: "#{repo_path}/example.php",
           line: 2,
-          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+          typos: [{ incorrect_word: 'mumber', correct_word: 'number' }]
         },
         {
           path: "#{repo_path}/example.php",
           line: 6,
-          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+          typos: [{ incorrect_word: 'mumber', correct_word: 'number' }]
         },
         {
           path: "#{repo_path}/example.py",
           line: 1,
-          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+          typos: [{ incorrect_word: 'mumber', correct_word: 'number' }]
         },
         {
           path: "#{repo_path}/example.py",
           line: 4,
-          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+          typos: [{ incorrect_word: 'mumber', correct_word: 'number' }]
         },
         {
           path: "#{repo_path}/example.rb",
           line: 1,
-          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+          typos: [{ incorrect_word: 'mumber', correct_word: 'number' }]
         },
         {
           path: "#{repo_path}/example.rb",
           line: 3,
-          typos: { incorrect_word: 'languege', correct_word: 'language' }
+          typos: [{ incorrect_word: 'languege', correct_word: 'language' }]
         },
         {
           path: "#{repo_path}/example.rb",
-          line: 5,
-          typos: { incorrect_word: 'mumber', correct_word: 'number' }
+          line: 4,
+          typos: [
+            { incorrect_word: 'knowlege', correct_word: 'knowledge' },
+            { incorrect_word: 'languege', correct_word: 'language' }
+          ]
+        },
+        {
+          path: "#{repo_path}/example.rb",
+          line: 6,
+          typos: [{ incorrect_word: 'mumber', correct_word: 'number' }]
         }
       ]
       expect(found_typos).to eq found_typos_expected
@@ -147,6 +157,7 @@ RSpec.describe TypoChecker::Checker do
         def mumber_sum
           puts "This is a test"
           puts 'languege'
+          puts 'knowlege: languege' # typo
         end
         mumber_sum()
       RUBY
