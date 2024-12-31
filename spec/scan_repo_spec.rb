@@ -47,7 +47,7 @@ RSpec.describe TypoChecker::Checker do
       output = capture_stdout { checker.scan_repo(repo_path) }
       output = clean_output(output)
       expect(output).to match(%r{Typo found in #{repo_path}/example.rb:1:5: mumber -> number})
-      expect(output).to match(%r{Typo found in #{repo_path}/example.rb:4:1: mumber -> number})
+      expect(output).to match(%r{Typo found in #{repo_path}/example.rb:5:1: mumber -> number})
     end
 
     it 'detects typos in Python files' do
@@ -128,7 +128,12 @@ RSpec.describe TypoChecker::Checker do
         },
         {
           path: "#{repo_path}/example.rb",
-          line: 4,
+          line: 3,
+          typos: { incorrect_word: 'languege', correct_word: 'language' }
+        },
+        {
+          path: "#{repo_path}/example.rb",
+          line: 5,
           typos: { incorrect_word: 'mumber', correct_word: 'number' }
         }
       ]
@@ -141,6 +146,7 @@ RSpec.describe TypoChecker::Checker do
       File.write(File.join(repo_path, 'example.rb'), <<~RUBY)
         def mumber_sum
           puts "This is a test"
+          puts 'languege'
         end
         mumber_sum()
       RUBY
