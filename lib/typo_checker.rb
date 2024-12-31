@@ -46,6 +46,7 @@ module TypoChecker
       csv_file = File.expand_path('data/typos.csv', __dir__)
       CSV.foreach(csv_file, headers: false) do |row|
         next if skips.include?(row[0])
+
         typos[row[0]] = row[1]
       end
       typos
@@ -69,8 +70,9 @@ module TypoChecker
         words = line.split(/[^a-zA-Z0-9']+/)
         check_words = words.map { |word| split_function_name(word) }.flatten
         check_words.each do |word|
-          char_index = line.index(word)
-          check_word(word, path, line_number, char_index)
+          clean_word = word.gsub(/^[^\w]+|[^\w]+$/, '')
+          char_index = line.index(clean_word)
+          check_word(clean_word, path, line_number, char_index)
         end
       end
     end

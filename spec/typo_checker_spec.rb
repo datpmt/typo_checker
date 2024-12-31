@@ -133,8 +133,6 @@ RSpec.describe TypoChecker::Checker do
   describe '#load_typos' do
     context 'when no skips are provided' do
       it 'loads typos from a CSV file' do
-        checker = TypoChecker::Checker.new
-
         typos = checker.send(:load_typos)
 
         expect(typos['mispell']).to eq('misspell')
