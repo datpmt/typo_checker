@@ -4,7 +4,6 @@ on:
     branches: [ main ]
     paths:
       - 'lib/typo_checker/version.rb'
-  workflow_dispatch:
 jobs:
   push:
     name: Push gem to RubyGems.org
