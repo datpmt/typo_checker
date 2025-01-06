@@ -15,18 +15,13 @@ jobs:
       contents: write # IMPORTANT: this permission is required for `rake release` to push the release tag
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
+      # Set up
+      - uses: actions/checkout@v4
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.1
-
-      - name: Install dependencies
-        run: |
-          gem install bundler
-          bundle install
+          bundler-cache: true
+          ruby-version: ruby
 
       # Release
       - uses: rubygems/release-gem@v1
