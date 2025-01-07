@@ -51,7 +51,8 @@ module TypoChecker
     end
 
     def load_typos
-      TyposLoader.new(@configuration.skips).load_typos
+      csv_file = File.expand_path('../data/typos.csv', __dir__)
+      TyposLoader.new(@configuration.skips).load_typos(csv_file)
     end
   end
 end

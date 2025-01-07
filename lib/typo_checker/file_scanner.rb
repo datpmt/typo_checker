@@ -37,11 +37,16 @@ module TypoChecker
         result[path][:typos] << { line: line_num + 1, typos: [typo_details] }
       end
 
-      stdout(typo_path, word, corrected_word) if @stdoutput
+      stdout(typo_path, word, corrected_word)
     end
 
     def split_function_name(name)
-      name.gsub(/([a-z])([A-Z])/, '\1 \2').split(/[\s_]+/)
+      # Split on capital letters or digit transitions.
+      # This handles cases like camelCase, PascalCase, and mixed cases with digits.
+      name.gsub(/([a-zA-Z])(\d)/, '\1 \2')    # Between letter and digit
+          .gsub(/(\d)([A-Z])/, '\1 \2')       # Between digit and capital letter
+          .gsub(/([a-zA-Z])([A-Z])/, '\1 \2') # Between lowercase and uppercase
+          .split(/[\s_]+/)                    # Split on spaces and underscores
     end
 
     def corrected_word(word, typo_correct_word)
@@ -55,6 +60,8 @@ module TypoChecker
     end
 
     def stdout(typo_path, word, corrected_word)
+      return unless @stdoutput
+
       puts "Typo found in #{colorize_light_blue(typo_path)}: " \
             "#{colorize_red(word)} -> #{colorize_green(corrected_word)}"
     end
