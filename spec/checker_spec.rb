@@ -6,21 +6,59 @@ require 'fileutils'
 require_relative '../lib/typo_checker'
 
 RSpec.describe TypoChecker::Checker do
-  let(:checker) { described_class.new }
 
-  def capture_stdout(&block)
-    original_stdout = $stdout
-    $stdout = StringIO.new
-    block.call
-    $stdout.string
-  ensure
-    $stdout = original_stdout
-  end
+  let(:excludes) { [] }
+  let(:skips) { [] }
+  let(:stdoutput) { true }
+  let(:checker) { described_class.new(excludes, skips, stdoutput) }
 
   describe '#initialize' do
-    it 'loads the typos from the CSV file' do
-      expect(checker.typos['mispell']).to eq('misspell')
-      expect(checker.typos['realiable']).to eq('reliable')
+    context 'with empty values' do
+      let(:excludes) { }
+      let(:skips) { }
+      let(:stdoutput) { }
+
+      it 'empty' do
+        expect(checker.instance_variable_get(:@configuration).excludes).to eq([])
+        expect(checker.instance_variable_get(:@configuration).skips).to eq([])
+        expect(checker.instance_variable_get(:@configuration).stdoutput).to eq(true)
+      end
+    end
+
+    it 'default' do
+      expect(checker.instance_variable_get(:@configuration).excludes).to eq([])
+      expect(checker.instance_variable_get(:@configuration).skips).to eq([])
+      expect(checker.instance_variable_get(:@configuration).stdoutput).to eq(true)
+    end
+
+    context 'with skips' do
+      let(:skips) { ['realiable'] }
+
+      it do
+        expect(checker.instance_variable_get(:@configuration).excludes).to eq([])
+        expect(checker.instance_variable_get(:@configuration).skips).to eq(skips)
+        expect(checker.instance_variable_get(:@configuration).stdoutput).to eq(true)
+      end
+    end
+
+    context 'with excludes' do
+      let(:excludes) { ['example.rb', 'folder_name/*'] }
+
+      it do
+        expect(checker.instance_variable_get(:@configuration).excludes).to eq(excludes)
+        expect(checker.instance_variable_get(:@configuration).skips).to eq([])
+        expect(checker.instance_variable_get(:@configuration).stdoutput).to eq(true)
+      end
+    end
+
+    context 'with stdoutput' do
+      let(:stdoutput) { false }
+
+      it do
+        expect(checker.instance_variable_get(:@configuration).excludes).to eq([])
+        expect(checker.instance_variable_get(:@configuration).skips).to eq([])
+        expect(checker.instance_variable_get(:@configuration).stdoutput).to eq(stdoutput)
+      end
     end
   end
 
@@ -208,6 +246,15 @@ RSpec.describe TypoChecker::Checker do
     def clean_output(output)
       # Remove any ANSI escape codes (if present)
       output.gsub(/\e\[\d+([;\d+])*m/, '')
+    end
+
+    def capture_stdout(&block)
+      original_stdout = $stdout
+      $stdout = StringIO.new
+      block.call
+      $stdout.string
+    ensure
+      $stdout = original_stdout
     end
   end
 end
