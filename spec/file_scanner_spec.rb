@@ -85,29 +85,35 @@ module TypoChecker
         it 'adds the typo to the result with the correct details' do
           file_scanner.send(:check_word, 'mumber', file_path, line_number, char_index, result)
 
-          expect(result[file_path][:typos]).to eq([
+          expected_result = [
             { line: line_number + 1, typos: [{ incorrect_word: 'mumber', correct_word: 'number' }] }
-          ])
+          ]
+
+          expect(result[file_path][:typos]).to eq(expected_result)
         end
 
         it 'handles capitalization correctly' do
           file_scanner.send(:check_word, 'Mumber', file_path, line_number, char_index, result)
 
-          expect(result[file_path][:typos]).to eq([
+          expected_result = [
             { line: line_number + 1, typos: [{ incorrect_word: 'Mumber', correct_word: 'Number' }] }
-          ])
+          ]
+
+          expect(result[file_path][:typos]).to eq(expected_result)
         end
 
         it 'adds multiple typos to the same line' do
           file_scanner.send(:check_word, 'mumber', file_path, line_number, char_index, result)
           file_scanner.send(:check_word, 'languege', file_path, line_number, char_index + 10, result)
 
-          expect(result[file_path][:typos]).to eq([
+          expected_result = [
             { line: line_number + 1, typos: [
               { incorrect_word: 'mumber', correct_word: 'number' },
               { incorrect_word: 'languege', correct_word: 'language' }
-            ]}
-          ])
+            ] }
+          ]
+
+          expect(result[file_path][:typos]).to eq(expected_result)
         end
       end
 
@@ -159,25 +165,25 @@ module TypoChecker
       it 'splits camelCase to separate words' do
         result = file_scanner.send(:split_function_name, 'mumberSum')
 
-        expect(result).to eq(['mumber', 'Sum'])
+        expect(result).to eq(%w[mumber Sum])
       end
 
       it 'splits PascalCase to separate words' do
         result = file_scanner.send(:split_function_name, 'MumberSum')
 
-        expect(result).to eq(['Mumber', 'Sum'])
+        expect(result).to eq(%w[Mumber Sum])
       end
 
       it 'splits snake_case to separate words' do
         result = file_scanner.send(:split_function_name, 'mumber_sum')
 
-        expect(result).to eq(['mumber', 'sum'])
+        expect(result).to eq(%w[mumber sum])
       end
 
       it 'handles mixed snake_case and camelCase' do
         result = file_scanner.send(:split_function_name, 'mumber_Sum')
 
-        expect(result).to eq(['mumber', 'Sum'])
+        expect(result).to eq(%w[mumber Sum])
       end
 
       it 'returns the same word if it is a single word' do
@@ -201,7 +207,7 @@ module TypoChecker
       it 'splits words with digits correctly' do
         result = file_scanner.send(:split_function_name, 'mumber3Sum')
 
-        expect(result).to eq(['mumber', '3', 'Sum'])
+        expect(result).to eq(%w[mumber 3 Sum])
       end
 
       it 'returns an empty array for empty input' do
@@ -220,7 +226,7 @@ module TypoChecker
 
       it 'splits words in mixed cases correctly' do
         expect(file_scanner.send(:split_function_name,
-                            'CamelAndSnake_caseFunction')).to eq(%w[Camel And Snake case Function])
+                                 'CamelAndSnake_caseFunction')).to eq(%w[Camel And Snake case Function])
       end
     end
 

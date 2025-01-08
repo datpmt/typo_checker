@@ -6,7 +6,6 @@ require 'fileutils'
 require_relative '../lib/typo_checker'
 
 RSpec.describe TypoChecker::Checker do
-
   let(:excludes) { [] }
   let(:skips) { [] }
   let(:stdoutput) { true }
@@ -14,9 +13,7 @@ RSpec.describe TypoChecker::Checker do
 
   describe '#initialize' do
     context 'with empty values' do
-      let(:excludes) { }
-      let(:skips) { }
-      let(:stdoutput) { }
+      let(:checker) { described_class.new }
 
       it 'empty' do
         expect(checker.instance_variable_get(:@configuration).excludes).to eq([])

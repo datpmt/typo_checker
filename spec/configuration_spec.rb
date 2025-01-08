@@ -18,22 +18,22 @@ module TypoChecker
 
       it 'initializes with custom excludes, skips, and stdoutput' do
         excludes = ['file1.rb', 'file2.rb']
-        skips = ['WORD', 'OtherWord']
+        skips = %w[WORD OtherWord]
         stdoutput = false
 
         config = Configuration.new(excludes, skips, stdoutput)
 
         expect(config.excludes).to eq(excludes)
-        expect(config.skips).to eq(['word', 'otherword']) # Skips should be downcased
+        expect(config.skips).to eq(%w[word otherword]) # Skips should be downcased
         expect(config.stdoutput).to eq(stdoutput)
       end
 
       it 'defaults excludes to empty array when nil is passed' do
-        skips = ['word', 'anotherWord']
+        skips = %w[word anotherWord]
         config = Configuration.new(nil, skips)
 
         expect(config.excludes).to eq([])
-        expect(config.skips).to eq(['word', 'anotherword'])
+        expect(config.skips).to eq(%w[word anotherword])
       end
 
       it 'defaults skips to empty array when nil is passed' do
@@ -68,10 +68,10 @@ module TypoChecker
 
     describe '#skips' do
       it 'returns the skips array in lowercase' do
-        skips = ['WORD', 'OtherWord']
+        skips = %w[WORD OtherWord]
         config = Configuration.new([], skips)
 
-        expect(config.skips).to eq(['word', 'otherword'])
+        expect(config.skips).to eq(%w[word otherword])
       end
     end
 
