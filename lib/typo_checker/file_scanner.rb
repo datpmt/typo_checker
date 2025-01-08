@@ -45,7 +45,7 @@ module TypoChecker
       # This handles cases like camelCase, PascalCase, and mixed cases with digits.
       name.gsub(/([a-zA-Z])(\d)/, '\1 \2')    # Between letter and digit
           .gsub(/(\d)([A-Z])/, '\1 \2')       # Between digit and capital letter
-          .gsub(/([a-zA-Z])([A-Z])/, '\1 \2') # Between lowercase and uppercase
+          .gsub(/([a-z])([A-Z])/, '\1 \2')    # Between lowercase and uppercase
           .split(/[\s_]+/)                    # Split on spaces and underscores
     end
 

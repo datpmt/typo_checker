@@ -186,6 +186,18 @@ module TypoChecker
         expect(result).to eq(['sum'])
       end
 
+      it 'returns the same word if it is a single word' do
+        result = file_scanner.send(:split_function_name, 'HTML')
+
+        expect(result).to eq(['HTML'])
+      end
+
+      it 'returns the same word if it is a single word' do
+        result = file_scanner.send(:split_function_name, 'Sum')
+
+        expect(result).to eq(['Sum'])
+      end
+
       it 'splits words with digits correctly' do
         result = file_scanner.send(:split_function_name, 'mumber3Sum')
 
