@@ -8,7 +8,7 @@ require_relative '../lib/typo_checker'
 module TypoChecker
   RSpec.describe TyposLoader do
     let(:file_path) { 'spec/fixtures/typos.csv' }
-    let(:skips) { ['teh', 'recieve'] }
+    let(:skips) { %w[teh recieve] }
     let(:typos_loader) { TyposLoader.new(skips) }
 
     describe '#load_typos' do
@@ -16,9 +16,9 @@ module TypoChecker
         before do
           # Prepare the test CSV content
           CSV.open(file_path, 'w') do |csv|
-            csv << ['teh', 'the']
-            csv << ['recieve', 'receive']
-            csv << ['misteak', 'mistake']
+            csv << %w[teh the]
+            csv << %w[recieve receive]
+            csv << %w[misteak mistake]
           end
         end
 
@@ -29,16 +29,18 @@ module TypoChecker
         it 'loads typos and skips the entries in the skips list' do
           result = typos_loader.load_typos(file_path)
 
-          expect(result).to eq({
-            'misteak' => 'mistake'
-          })
+          expect(result).to eq(
+            {
+              'misteak' => 'mistake'
+            }
+          )
         end
       end
 
       context 'when the CSV file is empty' do
         before do
           # Create an empty CSV file
-          CSV.open(file_path, 'w') {}
+          CSV.open(file_path, 'w')
         end
 
         after do
@@ -58,9 +60,9 @@ module TypoChecker
         before do
           # Prepare the test CSV content
           CSV.open(file_path, 'w') do |csv|
-            csv << ['teh', 'the']
-            csv << ['recieve', 'receive']
-            csv << ['misteak', 'mistake']
+            csv << %w[teh the]
+            csv << %w[recieve receive]
+            csv << %w[misteak mistake]
           end
         end
 
@@ -71,11 +73,13 @@ module TypoChecker
         it 'loads all the typos from the CSV' do
           result = typos_loader.load_typos(file_path)
 
-          expect(result).to eq({
-            'teh' => 'the',
-            'recieve' => 'receive',
-            'misteak' => 'mistake'
-          })
+          expect(result).to eq(
+            {
+              'teh' => 'the',
+              'recieve' => 'receive',
+              'misteak' => 'mistake'
+            }
+          )
         end
       end
     end

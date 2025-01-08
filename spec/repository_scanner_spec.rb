@@ -49,13 +49,15 @@ module TypoChecker
 
         result = repository_scanner.scan
 
-        expect(result).to eq([
+        expected_result = [
           { path: File.join(repo_path, 'example.rb'), line: 2, typos: [{ incorrect_word: 'languege', correct_word: 'language' }] }
-        ])
+        ]
+
+        expect(result).to eq(expected_result)
       end
 
       it 'does not process excluded paths' do
-        allow(configuration).to receive(:excludes).and_return([%r{example\.rb}])
+        allow(configuration).to receive(:excludes).and_return(['example.rb'])
         result = repository_scanner.scan
         expect(result).to be_empty
       end
@@ -156,7 +158,7 @@ module TypoChecker
 
     describe '#exclude_path?' do
       it 'returns true for paths matching exclude patterns' do
-        allow(repository_scanner).to receive(:exclude_patterns).and_return([%r{example\.rb}])
+        allow(repository_scanner).to receive(:exclude_patterns).and_return(['example.rb'])
 
         result = repository_scanner.send(:exclude_path?, File.join(repo_path, 'example.rb'))
 
@@ -164,7 +166,7 @@ module TypoChecker
       end
 
       it 'returns false for paths not matching exclude patterns' do
-        allow(repository_scanner).to receive(:exclude_patterns).and_return([%r{example\.rb}])
+        allow(repository_scanner).to receive(:exclude_patterns).and_return(['example.rb'])
 
         result = repository_scanner.send(:exclude_path?, File.join(repo_path, 'another_file.rb'))
 
