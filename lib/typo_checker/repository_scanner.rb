@@ -9,20 +9,58 @@ module TypoChecker
     end
 
     def scan
-      result = {}
-      Find.find(@repo_path) do |path|
-        next if exclude_path?(path)
+      cops = {}
+      paths = @configuration.paths
+      # if paths.any? { |path| path.match?(%r{.*/\*$}) }
+      #   paths.each do |path|
+      #     Dir.glob(File.join(@repo_path, path)).each do |expanded_path|
+      #       next if exclude_path?(expanded_path)
 
-        @file_scanner.scan_file(path, result) if File.file?(path) && text_file?(path)
+      #       find_cops(cops, expanded_path)
+      #     end
+      #   end
+      # else
+      #   paths.each do |path|
+      #     path = File.join(@repo_path, path)
+      #     next if exclude_path?(path)
+
+      #     find_cops(cops, path)
+      #   end
+      # end
+      if paths.empty?
+        Find.find(@repo_path) do |path|
+          next if exclude_path?(path)
+
+          find_cops(cops, path)
+        end
+      else
+        paths.each do |path|
+          path = File.join(@repo_path, path)
+          next if exclude_path?(path)
+
+          find_cops(cops, path)
+        end
       end
-      result.map do |path, data|
+      scan_result(cops)
+    end
+
+    private
+
+    def scan_result(cops)
+      cops.map do |path, data|
         data[:typos].map do |entry|
           { path: path, line: entry[:line], typos: entry[:typos] }
         end
       end.flatten
     end
 
-    private
+    def find_cops(cops, path)
+      @file_scanner.scan_file(path, cops) if valid_text_file?(path)
+    end
+
+    def valid_text_file?(path)
+      File.file?(path) && text_file?(path)
+    end
 
     def exclude_path?(path)
       exclude_patterns.any? { |pattern| path.match?(pattern) }

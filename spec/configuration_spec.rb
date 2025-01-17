@@ -21,7 +21,7 @@ module TypoChecker
         skips = %w[WORD OtherWord]
         stdoutput = false
 
-        config = Configuration.new(excludes, skips, stdoutput)
+        config = Configuration.new(excludes: excludes, skips: skips, stdoutput: stdoutput)
 
         expect(config.excludes).to eq(excludes)
         expect(config.skips).to eq(%w[word otherword]) # Skips should be downcased
@@ -29,8 +29,9 @@ module TypoChecker
       end
 
       it 'defaults excludes to empty array when nil is passed' do
+        excludes = nil
         skips = %w[word anotherWord]
-        config = Configuration.new(nil, skips)
+        config = Configuration.new(excludes: excludes, skips: skips)
 
         expect(config.excludes).to eq([])
         expect(config.skips).to eq(%w[word anotherword])
@@ -38,20 +39,26 @@ module TypoChecker
 
       it 'defaults skips to empty array when nil is passed' do
         excludes = ['file1.rb']
-        config = Configuration.new(excludes, nil)
+        skips = nil
+        config = Configuration.new(excludes: excludes, skips: skips)
 
         expect(config.excludes).to eq(excludes)
         expect(config.skips).to eq([])
       end
 
       it 'defaults stdoutput to true when nil is passed' do
-        config = Configuration.new([], [], nil)
+        excludes = []
+        skips = []
+        config = Configuration.new(excludes: excludes, skips: skips)
 
         expect(config.stdoutput).to be(true)
       end
 
       it 'sets stdoutput correctly when a value is passed' do
-        config = Configuration.new([], [], false)
+        excludes = []
+        skips = []
+        stdoutput = false
+        config = Configuration.new(excludes: excludes, skips: skips, stdoutput: stdoutput)
 
         expect(config.stdoutput).to be(false)
       end
@@ -60,7 +67,7 @@ module TypoChecker
     describe '#excludes' do
       it 'returns the excludes array' do
         excludes = ['file1.rb', 'file2.rb']
-        config = Configuration.new(excludes)
+        config = Configuration.new(excludes: excludes)
 
         expect(config.excludes).to eq(excludes)
       end
@@ -69,7 +76,7 @@ module TypoChecker
     describe '#skips' do
       it 'returns the skips array in lowercase' do
         skips = %w[WORD OtherWord]
-        config = Configuration.new([], skips)
+        config = Configuration.new(skips: skips)
 
         expect(config.skips).to eq(%w[word otherword])
       end
@@ -77,15 +84,24 @@ module TypoChecker
 
     describe '#stdoutput' do
       it 'returns true if stdoutput is not passed and is nil' do
-        config = Configuration.new([], [], nil)
+        stdoutput = nil
+        config = Configuration.new(stdoutput: stdoutput)
 
         expect(config.stdoutput).to be(true)
       end
 
       it 'returns the passed value of stdoutput' do
-        config = Configuration.new([], [], false)
+        stdoutput = false
+        config = Configuration.new(stdoutput: stdoutput)
 
         expect(config.stdoutput).to be(false)
+      end
+
+      it 'returns the passed value of stdoutput' do
+        stdoutput = true
+        config = Configuration.new(stdoutput: stdoutput)
+
+        expect(config.stdoutput).to be(true)
       end
     end
   end
