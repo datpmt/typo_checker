@@ -107,6 +107,22 @@ module TypoChecker
 
         expect(result).to be_empty
       end
+
+      it 'scans files matching the specified pattern' do
+        allow(configuration).to receive(:paths).and_return(['*.rb'])
+        allow(file_scanner).to receive(:scan_file) do |path, result|
+          result[path] = { typos: [{ line: 2, typos: [{ incorrect_word: 'languege', correct_word: 'language' }] }] }
+        end
+
+        result = repository_scanner.scan
+
+        expected_result = [
+          { path: File.join(repo_path, 'example.rb'), line: 2, typos: [{ incorrect_word: 'languege', correct_word: 'language' }] },
+          { path: File.join(repo_path, 'example1.rb'), line: 2, typos: [{ incorrect_word: 'languege', correct_word: 'language' }] }
+        ]
+
+        expect(result).to eq(expected_result)
+      end
     end
 
     describe '#exclude_path?' do

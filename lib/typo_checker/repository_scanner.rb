@@ -11,34 +11,22 @@ module TypoChecker
     def scan
       cops = {}
       paths = @configuration.paths
-      # if paths.any? { |path| path.match?(%r{.*/\*$}) }
-      #   paths.each do |path|
-      #     Dir.glob(File.join(@repo_path, path)).each do |expanded_path|
-      #       next if exclude_path?(expanded_path)
 
-      #       find_cops(cops, expanded_path)
-      #     end
-      #   end
-      # else
-      #   paths.each do |path|
-      #     path = File.join(@repo_path, path)
-      #     next if exclude_path?(path)
-
-      #     find_cops(cops, path)
-      #   end
-      # end
       if paths.empty?
+        # Find all files in the repository
         Find.find(@repo_path) do |path|
           next if exclude_path?(path)
 
           find_cops(cops, path)
         end
       else
-        paths.each do |path|
-          path = File.join(@repo_path, path)
-          next if exclude_path?(path)
+        paths.each do |pattern|
+          # Find files based on the pattern
+          Dir.glob(File.join(@repo_path, pattern)) do |path|
+            next if exclude_path?(path)
 
-          find_cops(cops, path)
+            find_cops(cops, path)
+          end
         end
       end
       scan_result(cops)
