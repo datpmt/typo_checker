@@ -5,10 +5,7 @@
 # patterns to exclude entire directories.
 
 excludes: # Folders and files to exclude from typo checks
-  # Example: Exclude a specific file (e.g., 'exclude.rb' in the 'excludes' folder)
-  - excludes/exclude.rb
-  # Example: Exclude all files in the 'test' folder inside the 'excludes' directory
-  - excludes/test/*
+  - rspec
 
 # 'skips' section defines a list of words, file names, or patterns
 # for which Typocop will skip checking for typos. This is useful for common
