@@ -8,9 +8,10 @@ require_relative '../lib/typo_checker'
 module TypoChecker
   RSpec.describe RepositoryScanner do
     let(:repo_path) { 'spec/fixtures/test_repo' }
+    let(:paths) { [] }
     let(:excludes) { [] }
     let(:skips) { [] }
-    let(:configuration) { double('Configuration', excludes: excludes, skips: skips, stdoutput: true) }
+    let(:configuration) { double('Configuration', paths: paths, excludes: excludes, skips: skips, stdoutput: true) }
     let(:typos) { { 'mumber' => 'number', 'languege' => 'language' } }
     let(:file_scanner) { double('FileScanner') }
     let(:repository_scanner) { RepositoryScanner.new(repo_path, configuration) }
@@ -34,8 +35,7 @@ module TypoChecker
       before do
         FileUtils.mkdir_p(repo_path)
         File.write(File.join(repo_path, 'example.rb'), "def mumber_sum\nputs 'languege'\nend")
-
-        allow(Find).to receive(:find).and_yield(File.join(repo_path, 'example.rb'))
+        File.write(File.join(repo_path, 'example1.rb'), "def mumber_sum\nputs 'languege'\nend")
       end
 
       after do
@@ -50,6 +50,23 @@ module TypoChecker
         result = repository_scanner.scan
 
         expected_result = [
+          { path: File.join(repo_path, 'example.rb'), line: 2, typos: [{ incorrect_word: 'languege', correct_word: 'language' }] },
+          { path: File.join(repo_path, 'example1.rb'), line: 2, typos: [{ incorrect_word: 'languege', correct_word: 'language' }] }
+        ]
+
+        expect(result).to eq(expected_result)
+      end
+
+      it 'with paths specified, only scans those paths' do
+        allow(configuration).to receive(:paths).and_return(['example.rb'])
+        allow(file_scanner).to receive(:scan_file) do |path, result|
+          result[path] = { typos: [{ line: 2, typos: [{ incorrect_word: 'languege', correct_word: 'language' }] }] }
+        end
+
+        result = repository_scanner.scan
+
+        # Only the specified file should be scanned
+        expected_result = [
           { path: File.join(repo_path, 'example.rb'), line: 2, typos: [{ incorrect_word: 'languege', correct_word: 'language' }] }
         ]
 
@@ -58,8 +75,17 @@ module TypoChecker
 
       it 'does not process excluded paths' do
         allow(configuration).to receive(:excludes).and_return(['example.rb'])
+        allow(file_scanner).to receive(:scan_file) do |path, result|
+          result[path] = { typos: [{ line: 2, typos: [{ incorrect_word: 'languege', correct_word: 'language' }] }] }
+        end
+
         result = repository_scanner.scan
-        expect(result).to be_empty
+
+        expected_result = [
+          { path: File.join(repo_path, 'example1.rb'), line: 2, typos: [{ incorrect_word: 'languege', correct_word: 'language' }] }
+        ]
+
+        expect(result).to eq(expected_result)
       end
 
       it 'excludes specific directories like .git, node_modules, vendor, tmp' do
@@ -80,6 +106,22 @@ module TypoChecker
         result = repository_scanner.scan
 
         expect(result).to be_empty
+      end
+
+      it 'scans files matching the specified pattern' do
+        allow(configuration).to receive(:paths).and_return(['*.rb'])
+        allow(file_scanner).to receive(:scan_file) do |path, result|
+          result[path] = { typos: [{ line: 2, typos: [{ incorrect_word: 'languege', correct_word: 'language' }] }] }
+        end
+
+        result = repository_scanner.scan
+
+        expected_result = [
+          { path: File.join(repo_path, 'example.rb'), line: 2, typos: [{ incorrect_word: 'languege', correct_word: 'language' }] },
+          { path: File.join(repo_path, 'example1.rb'), line: 2, typos: [{ incorrect_word: 'languege', correct_word: 'language' }] }
+        ]
+
+        expect(result).to eq(expected_result)
       end
     end
 

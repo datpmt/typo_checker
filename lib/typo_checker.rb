@@ -10,8 +10,13 @@ require_relative 'typo_checker/repository_scanner'
 
 module TypoChecker
   class Checker
-    def initialize(excludes = [], skips = [], stdoutput = true)
-      @configuration = Configuration.new(excludes, skips, stdoutput)
+    def initialize(paths: [], excludes: [], skips: [], stdoutput: true)
+      raise ArgumentError, '`paths` must be an Array' unless paths.instance_of?(Array)
+      raise ArgumentError, '`excludes` must be an Array' unless excludes.instance_of?(Array)
+      raise ArgumentError, '`skips` must be an Array' unless skips.instance_of?(Array)
+      raise ArgumentError, '`stdoutput` must be a Boolean' unless [TrueClass, FalseClass].include?(stdoutput.class)
+
+      @configuration = Configuration.new(paths: paths, excludes: excludes, skips: skips, stdoutput: stdoutput)
     end
 
     def scan_repo(repo_path = Dir.pwd)
