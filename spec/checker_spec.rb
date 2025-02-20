@@ -6,10 +6,18 @@ require 'fileutils'
 require_relative '../lib/typo_checker'
 
 RSpec.describe TypoChecker::Checker do
+  let(:repo_path) { 'some/repo/path' }
   let(:excludes) { [] }
   let(:skips) { [] }
   let(:stdoutput) { true }
-  let(:checker) { described_class.new(excludes, skips, stdoutput) }
+  let(:checker) do
+    described_class.new(
+      paths: [],
+      excludes: excludes,
+      skips: skips,
+      stdoutput: stdoutput
+    )
+  end
 
   describe '#initialize' do
     context 'with empty values' do
@@ -55,6 +63,28 @@ RSpec.describe TypoChecker::Checker do
         expect(checker.instance_variable_get(:@configuration).excludes).to eq([])
         expect(checker.instance_variable_get(:@configuration).skips).to eq([])
         expect(checker.instance_variable_get(:@configuration).stdoutput).to eq(stdoutput)
+      end
+    end
+
+    context 'when invalid arguments are provided' do
+      it 'raises an error if paths is not an array' do
+        expect { described_class.new(paths: 'invalid_paths') }
+          .to raise_error(ArgumentError, '`paths` must be an Array')
+      end
+
+      it 'raises an error if excludes is not an array' do
+        expect { described_class.new(excludes: 'invalid_excludes') }
+          .to raise_error(ArgumentError, '`excludes` must be an Array')
+      end
+
+      it 'raises an error if skips is not an array' do
+        expect { described_class.new(skips: 'invalid_skips') }
+          .to raise_error(ArgumentError, '`skips` must be an Array')
+      end
+
+      it 'raises an error if stdoutput is not a boolean' do
+        expect { described_class.new(stdoutput: 'true') }
+          .to raise_error(ArgumentError, '`stdoutput` must be a Boolean')
       end
     end
   end

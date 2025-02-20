@@ -9,20 +9,46 @@ module TypoChecker
     end
 
     def scan
-      result = {}
-      Find.find(@repo_path) do |path|
-        next if exclude_path?(path)
+      cops = {}
+      paths = @configuration.paths
 
-        @file_scanner.scan_file(path, result) if File.file?(path) && text_file?(path)
+      if paths.empty?
+        # Find all files in the repository
+        Find.find(@repo_path) do |path|
+          next if exclude_path?(path)
+
+          find_cops(cops, path)
+        end
+      else
+        paths.each do |pattern|
+          # Find files based on the pattern
+          Dir.glob(File.join(@repo_path, pattern)) do |path|
+            next if exclude_path?(path)
+
+            find_cops(cops, path)
+          end
+        end
       end
-      result.map do |path, data|
+      scan_result(cops)
+    end
+
+    private
+
+    def scan_result(cops)
+      cops.map do |path, data|
         data[:typos].map do |entry|
           { path: path, line: entry[:line], typos: entry[:typos] }
         end
       end.flatten
     end
 
-    private
+    def find_cops(cops, path)
+      @file_scanner.scan_file(path, cops) if valid_text_file?(path)
+    end
+
+    def valid_text_file?(path)
+      File.file?(path) && text_file?(path)
+    end
 
     def exclude_path?(path)
       exclude_patterns.any? { |pattern| path.match?(pattern) }

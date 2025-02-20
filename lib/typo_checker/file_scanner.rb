@@ -63,7 +63,7 @@ module TypoChecker
       return unless @stdoutput
 
       puts "Typo found in #{colorize_light_blue(typo_path)}: " \
-            "#{colorize_red(word)} -> #{colorize_green(corrected_word)}"
+           "#{colorize_red(word)} -> #{colorize_green(corrected_word)}"
     end
 
     def colorize_red(text)
