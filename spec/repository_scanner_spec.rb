@@ -121,7 +121,7 @@ module TypoChecker
           { path: File.join(repo_path, 'example1.rb'), line: 2, typos: [{ incorrect_word: 'languege', correct_word: 'language' }] }
         ]
 
-        expect(result).to eq(expected_result)
+        expect(result.sort_by { |r| r[:path] }).to eq(expected_result.sort_by { |r| r[:path] })
       end
     end
 
